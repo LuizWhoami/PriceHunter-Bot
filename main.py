@@ -1,23 +1,40 @@
 import requests
 from bs4 import BeautifulSoup
 
-#1 abrir a shopee com a peesquisa basica
-#2 vai olhar até a pagina 2
-#3 analisa os menores preços e maiores
-#4 analisa os com mais compras
-#5 analisa os 3 melhores em compras e em preços
 
-requisicao = requests.get("https://shopee.com.br/search?keyword=pc&page=0&sortBy=relevancy")
-contentss = requisicao.text
-soup = BeautifulSoup(requisicao.content, "html.parser")
+url = 'https://lista.mercadolivre.com.br/pc'
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+}
+
+response = requests.get(url, headers=headers)
+
+if response.status_code == 200:
+    print('conexão com sucesso')
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    pega_nome = soup.find_all('div', class_='poly-card__content')
+    
+    for itens in pega_nome:
+
+        produto = itens.find('h3')
+        preco = itens.find('span', class_='andes-money-amount')
+        desconto = itens.find('span', class_='andes-money-amount__discount')
+
+        tag_link = itens.find('a')
+        link = tag_link['href'] if tag_link else "Link não encontrado"
+        if produto:
+            print(f'Produto: {produto.text.strip()}')
+            print(f'Preço:  {preco.text.strip()} ')
+            if desconto:   
+                print(f'Desconto: {desconto.text}')
+            else:
+                print('Sem desconto')
+            print(f'Link: {link} \n \n')
 
 
-tag_titulo = soup.find_all('li', class_='ui-search-layout__item')
-titulo = []
-for tag in tag_titulo:
-    titulo.append(tag.text)
+#Integração com telegram
 
-preco = soup.find_all('div', class_='poly-component__price')
-price = []
-for tags in preco:
-    price.append(tags.text.replace('Ã', ''))
+id = '6522307847'
+key = 
