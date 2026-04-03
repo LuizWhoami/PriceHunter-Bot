@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 
 def enviar():
     
-    chat_id = '-5102848021'
-    token = '8788032847:AAEOwVrWD-Y017Qk4Mewm6VSF8Yh9JllLNE'
+    chat_id = 'id'
+    token = 'Key'
 
     url_telegram = f'https://api.telegram.org/bot{token}/sendMessage'
 
