@@ -15,35 +15,42 @@ if response.status_code == 200:
 
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    pega_nome = soup.find_all('div', class_='poly-card__content')
-    
+    pega_nome = soup.find_all('div', class_='poly-card')
+
     resultados = []
     
     for itens in pega_nome:
-
+   
         produto = itens.find('h3')
         preco = itens.find('span', class_='andes-money-amount')
         desconto = itens.find('span', class_='poly-price__disc_label')
+        imagem = itens.find('img', class_='poly-component__picture')
 
-        if produto and preco and desconto:
-
+        if produto and preco and desconto: 
             produto1 = produto.text.strip()
             preco1 = preco.text.strip()
             desconto1 = desconto.text.strip()   
+
+            tag_imagem = itens.find('img')
+            link_imagem = tag_imagem['src']
+            link_imagens = link_imagem.strip()
 
             tag_link = itens.find('a')
             link = tag_link['href'] if tag_link else "Link não encontrado"
             linkis = link.strip()
 
             dados = {
-                'Produto': [produto1],
-                'Preço': [preco1],
-                'Desconto': [desconto1],
-                'Link': [linkis]
+                'Produto': produto1,
+                'Preço': preco1,
+                'Desconto': desconto1,
+                'Link': linkis,
+                'Imagem': link_imagens
             }
+
             resultados.append(dados)
 
         if produto:
+            print(f'Imagem: {link_imagens}')
             print(f'Produto: {produto1}')
             print(f'Preço:  {preco1} ')
             if desconto1:   
@@ -67,17 +74,20 @@ for index, linha in df.iterrows():
     preco2 = linha['Preço']
     desconto2 = linha['Desconto']
     link2 = linha['Link']
+    imagem2 = linha['Imagem']
 
     mensagem = (
         f"{'-'*100} \n"
         f"📦 Produto: {produto2} \n \n"
         f"💰 Preço: {preco2} \n \n"
         f"📉 Desconto: {desconto2} \n \n"
-        f"🔗 Link: {link2} \n"
+        f"🔗 Link: {link2} \n \n \n \n \n \n \n"
+        f"{imagem2}"
         f"{'-'*100}"
     )
     
     url_telegram = f'https://api.telegram.org/bot{token}/sendMessage'
+    sleep(10)
     payload = {
         'chat_id': chat_id,
         'token': token,
