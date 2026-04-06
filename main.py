@@ -66,8 +66,8 @@ df = pd.DataFrame(resultados)
 df.to_excel('Produtos.xlsx', index=False, engine='openpyxl')
 print('Dados salvos')
 
-chat_id = '-5102848021'
-token = '8788032847:AAEOwVrWD-Y017Qk4Mewm6VSF8Yh9JllLNE'
+chat_id = ''
+token = ''
 
 for index, linha in df.iterrows():
     produto2 = linha['Produto']
