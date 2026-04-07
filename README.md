@@ -1,5 +1,4 @@
 # PriceHunter-Bot
 
-construindo
-contruindo
+### O bot do PricceHunter é um bot de web scrapping em plataformas ecomerce
 
