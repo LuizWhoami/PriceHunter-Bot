@@ -8,3 +8,6 @@ if resposta.status_code == 200:
     print('conexão feita')
 
     soup = BeautifulSoup(resposta.content, 'html.parser')
+
+
+sleep>102
