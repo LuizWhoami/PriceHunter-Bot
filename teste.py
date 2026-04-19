@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 import pandas as pd
 from time import sleep
 from selenium import webdriver
@@ -8,6 +7,8 @@ from selenium.webdriver.chrome.options import Options
 import os
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from io import BytesIO
+
 
 
 dir_path = os.getcwd()
@@ -17,46 +18,52 @@ driver = webdriver.Chrome(chrome_options2)
 url = 'https://www.mercadolivre.com.br/afiliados/hub'
 driver.get(url)
 
-sleep(5)
+
+sleep(15)
 actions = ActionChains(driver)
-for i in range(40):
+for i in range(1):
     actions.send_keys(Keys.END)
     actions.pause(2)
-    sleep(2)
 actions.perform()
-sleep(30)
+
 try:
-    produto = driver.find_elements(By.CLASS_NAME, 'poly-component__title')
-    cifrao = driver.find_elements(By.CLASS_NAME, 'andes-money-amount__currency-symbol')
-    preco = driver.find_elements(By.CLASS_NAME, 'andes-money-amount__fraction')
-    virgula_dinh = driver.find_elements(By.CLASS_NAME, 'andes-money-amount__cents')
-    
-    desconto = driver.find_elements(By.CLASS_NAME, 'andes-money-amount__discount')
-
-    img = driver.find_elements(By.CLASS_NAME, 'poly-component__picture')
-
     resultados = []
-    for produtos, cifra, preso, virgula, descon, imagems in zip(produto, cifrao, preco, virgula_dinh, desconto, img):
-       prod = produtos.text.strip()
-       prec = cifra.text.strip()
-       pres = preso.text.strip()
-       virg = virgula.text.strip()
-       desco = descon.text.strip()
+
+    produto = driver.find_elements(By.CLASS_NAME, 'poly-card')
+    link = driver.find_elements(By.CLASS_NAME, 'poly-component__title')
+    img = driver.find_elements(By.CLASS_NAME, 'poly-component__picture')
+    price = driver.find_elements(By.CLASS_NAME, 'poly-price__current')
+    price_antes = driver.find_elements(By.CLASS_NAME, 'andes-money-amount--cents-comma')
+
+
+    for produtos, imagems, lin, pri_an, pricee in zip (produto, img, link, price, price_antes):
+       pres_anterior = produtos.find_element(By.CLASS_NAME, 'andes-money-amount__fraction').text
+       virg_anterior = produtos.find_element(By.CLASS_NAME, 'andes-money-amount__cents').text
+       prod = produtos.find_element(By.CLASS_NAME, 'poly-component__title').text
+       pres = pri_an.find_element(By.CLASS_NAME, 'andes-money-amount__fraction').text
+       virg = pri_an.find_element(By.CLASS_NAME, 'andes-money-amount__cents').text
+       desco = produtos.find_element(By.CLASS_NAME, 'poly-price__disc--pill').text
+       
+       
+       linkss = lin.get_attribute('href')
 
        imagem = imagems.get_attribute('src')
-       linkss = produtos.get_attribute('href')
-       print(f'Produto: {prod} \n Preço: {prec}{pres} 0,{virg} \n Desconto: {desco}')
+
+       imagens = requests.get(imagem).content
+
+       print(f'Produto: {prod} \n Preço Anterior: R${pres},{virg} \n Preço Atual: R${pres_anterior},{virg_anterior} \n Desconto: {desco}')
        print(f'Link: {linkss}')
        print(f'Imagem: {imagem}')
-
+       
        dados = {
             'Produto': prod,
-            'Cifrão': prec,
             'Preço': pres,
+            'Preço_Anterior': pres_anterior,
             'Virgula': virg,
+            'Virgula_Anterior': virg_anterior,
             'Desconto': desco,
             'Link': linkss,
-            'Imagem': imagem
+            'Imagem': imagens
         }
        resultados.append(dados)
     sleep(5)
@@ -68,44 +75,46 @@ df = pd.DataFrame(resultados)
 df.to_excel('Produtos.xlsx', index=False, engine='openpyxl')
 print('Dados salvos')
 
-chat_id = ''
-token = ''
+chat_id = '-5102848021'
+token = '8788032847:AAEOwVrWD-Y017Qk4Mewm6VSF8Yh9JllLNE'
 
 
 for index, linha in df.iterrows():
     produto2 = linha['Produto']
-    cifra = linha['Cifrão']
     preco2 = linha['Preço']
+    preco3 = linha['Preço_Anterior']
     virgula = linha['Virgula']
+    virgula3 = linha['Virgula_Anterior']
     desconto2 = linha['Desconto']
     link2 = linha['Link']
     imagem2 = linha['Imagem']
 
     mensagem = (
-        f"{'-'*100} \n"
-        f"📦 Produto: {produto2} \n \n"
-        f"💰 Preço: {cifra} {preco2} 0,{virgula} \n \n"
+        f"\n"
+        f"📦 {produto2} \n \n"
+        f" ❌​ Preço Anterior:R$ {preco3},{virgula3} \n \n"
+        f" 💰 ​ Preço Atual:R$ {preco2},{virgula} \n \n"
         f"📉 Desconto: {desconto2} \n \n"
         f"🔗 Link: {link2} \n \n \n \n "
-        f" {imagem2} "
-        f"{'-'*100}"
     )
     
-    url_telegram = f'https://api.telegram.org/bot{token}/sendMessage'
-    
-    payload = {
-        'chat_id': chat_id,
-        'token': token,
-        'text': mensagem,
-        'disable_web_page_preview': False
-    }
-    
-    resposta = requests.post(url_telegram, payload)
-    sleep(5)
-    if resposta.status_code == 200:
+    url_telegram2 = f'https://api.telegram.org/bot{token}/sendPhoto'   
+
+    #resposta = requests.post(url_telegram, payload)
+    resposta2 = requests.post(url_telegram2,
+                              data={
+            "chat_id": chat_id,
+            "token": token,
+            "caption": mensagem
+        },
+        files={
+            "photo": ("img.jpg", BytesIO(imagem2)),
+        })
+
+    if resposta2.status_code == 200:
         print('Mensagem enviada com sucesso')
         sleep(2)
 
     else:
-        print(f'Erro {resposta.status_code}')
-        print(resposta.text)
+        print(f'Erro {resposta2.status_code}')
+        print(resposta2.text)
