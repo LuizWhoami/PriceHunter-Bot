@@ -1,7 +1,7 @@
 # 🤖 Bot de Automação de Produtos para Telegram
 ## Em Construção
 <img src='criação.png' />
-## 📌 Sobre o Projeto
+## 📌 Sobre o Projeto 1.0
 Este projeto consiste no desenvolvimento de um bot para Telegram capaz de automatizar a busca, organização e envio de produtos para usuários.
 
 A proposta é criar uma solução eficiente para facilitar a divulgação de produtos, podendo ser utilizada em:
